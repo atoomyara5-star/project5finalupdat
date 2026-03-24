@@ -1,0 +1,384 @@
+﻿@* @model List<LibraryD.Models.Book>
+
+@{
+    ViewData["Title"] = "Library";
+    Layout = "_Layout";
+}
+
+<!-- Hero Section -->
+<div class="library-hero text-center text-white py-5">
+    <h1 class="display-4 fw-bold">Discover Your Favorite Books Easily</h1>
+    <p class="lead">Browse, explore, and enjoy reading</p>
+
+    <!-- Filter/Search Section -->
+    <form method="get" asp-action="Index" class="d-flex justify-content-center mt-4 flex-wrap gap-2">
+        <input type="text" name="search" value="@ViewBag.Search" placeholder="Search for a book..." class="form-control form-control-lg shadow" style="width:300px;">
+        <select name="categoryId" class="form-select form-select-lg shadow" style="width:200px;">
+            <option value="">All Categories</option>
+            @foreach (var cat in ViewBag.Categories)
+            {
+                <option value="@cat.CategoryId" selected="@(ViewBag.SelectedCategory == cat.CategoryId)">
+                    @cat.CategoryName
+                </option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary btn-lg shadow">Search</button>
+    </form>
+</div>
+
+<!-- Books Section -->
+<div class="container mt-5">
+    <div class="row g-4">
+        @foreach (var book in Model)
+        {
+            <div class="col-6 col-md-4 col-lg-3 d-flex align-items-stretch">
+                <div class="book-card shadow-lg border-0 rounded overflow-hidden d-flex flex-column align-items-center text-center p-2 w-100">
+                    <img src="@(book.Picture ?? "https://images.pexels.com/photos/46274/pexels-photo-46274.jpeg")"
+                         class="book-img rounded img-fluid mb-2" alt="@book.BookName">
+                    <h5 class="mt-2">@book.BookName</h5>
+                    <p class="text-muted mb-1">@book.Author</p>
+                    <span class="badge @(book.Status?.StatusName == "Available" ? "bg-success" : "bg-danger") mb-2">
+                        @book.Status?.StatusName
+                    </span>
+
+                    <div class="card-footer bg-transparent border-0 mt-auto w-100 text-center">
+                        <button class="btn btn-outline-light w-100 mb-1" disabled>
+                            <i class="bi bi-eye"></i> View Details
+                        </button>
+                        <div class="d-flex justify-content-center">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size:4rem; color:#adb5bd;"></i>
+            <p class="text-muted mt-3">No books available at the moment</p>
+        </div>
+    }
+</div>
+
+<style>
+    /* Hero Section */
+    .library-hero {
+        background: linear-gradient(135deg, #4B0082, #6a11cb);
+        border-radius: 0 0 50% 50% / 20%;
+        margin-bottom: 3rem;
+    }
+
+    /* Book Cards */
+    .book-card {
+        background: linear-gradient(135deg, #5e2b8a, #7a33c4);
+        color: #fff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+        .book-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 2rem rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #6a11cb, #8b2fe6);
+        }
+
+    .book-img {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-radius: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-outline-light {
+        border: 1px solid #d1b3ff;
+        color: #d1b3ff;
+        border-radius: 0.5rem;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+        .btn-outline-light:hover {
+            background-color: rgba(209, 179, 255, 0.9);
+            color: #2c1f3a;
+        }
+
+    /* Stars Rating */
+    .card-footer .bi-star,
+    .card-footer .bi-star-fill {
+        color: #d1b3ff;
+        margin: 0 2px;
+    }
+
+        .card-footer .bi-star-fill:hover {
+            color: #fff;
+        }
+</style>
+ *@
+@model IEnumerable<LibraryD.Models.Book>
+
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_Layout";
+}
+
+<!-- Hero Section -->
+<div class="library-hero text-center text-white py-5">
+    <h1 class="display-4 fw-bold">Welcome to Yarmouk University Library</h1>
+    <p class="lead">Discover knowledge and enjoy a peaceful, exceptional reading experience</p>
+    <a asp-controller="Books" asp-action="Index" class="btn btn-primary btn-lg mt-3 px-5 shadow">
+        Explore Library <i class="bi bi-arrow-right ms-2"></i>
+    </a>
+</div>
+
+<!-- Services Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-5 fw-bold section-title">Library Services</h2>
+    <div class="row g-4">
+        <!-- Digital Borrowing Service -->
+        <div class="col-md-4">
+            <div class="service-card text-center p-4">
+                <div class="service-icon mx-auto mb-4">
+                    <i class="bi bi-laptop fs-1"></i>
+                </div>
+                <h3 class="h4 fw-bold mb-3">Digital Borrowing</h3>
+                <p class="text-muted mb-0">
+                    Reserve books anytime, from anywhere, and access knowledge at your convenience.
+                </p>
+            </div>
+        </div>
+
+        <!-- Study Rooms Service -->
+        <div class="col-md-4">
+            <div class="service-card text-center p-4">
+                <div class="service-icon mx-auto mb-4">
+                    <i class="bi bi-door-open fs-1"></i>
+                </div>
+                <h3 class="h4 fw-bold mb-3">Study Rooms</h3>
+                <p class="text-muted mb-0">
+                    Book fully equipped group study rooms for collaborative projects and academic discussions
+                </p>
+            </div>
+        </div>
+
+        <!-- Academic Support Service -->
+        <div class="col-md-4">
+            <div class="service-card text-center p-4">
+                <div class="service-icon mx-auto mb-4">
+                    <i class="bi bi-journal-bookmark-fill fs-1"></i>
+                </div>
+                <h3 class="h4 fw-bold mb-3">Academic Support</h3>
+                <p class="text-muted mb-0">
+                    Access comprehensive research services, leading scientific databases, and professional guidance to support and enhance your academic projects.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Resources Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-5 fw-bold">Academic Resources</h2>
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card text-center p-4">
+                <i class="bi bi-book fs-1 text-primary"></i>
+                <h3 class="mt-3 mb-0">+10,000</h3>
+                <p class="text-muted">Print Books</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card text-center p-4">
+                <i class="bi bi-journal fs-1 text-primary"></i>
+                <h3 class="mt-3 mb-0">+50,000</h3>
+                <p class="text-muted">E-Resources</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card text-center p-4">
+                <i class="bi bi-person-video3 fs-1 text-primary"></i>
+                <h3 class="mt-3 mb-0">+20</h3>
+                <p class="text-muted">Study Rooms</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card text-center p-4">
+                <i class="bi bi-database fs-1 text-primary"></i>
+                <h3 class="mt-3 mb-0">+15</h3>
+                <p class="text-muted">Scientific Databases</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Hero Section */
+    .library-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 0 0 50px 50px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .library-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(78, 115, 223, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .library-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 250px;
+            height: 250px;
+            background: rgba(78, 115, 223, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .library-hero .btn-primary {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            border: none;
+            transition: all 0.3s;
+        }
+
+            .library-hero .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(78, 115, 223, 0.4);
+            }
+
+    /* Section Title */
+    .section-title {
+        position: relative;
+        display: inline-block;
+        width: auto;
+        color: #1a1a2e;
+    }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #4e73df, #224abe);
+            border-radius: 2px;
+        }
+
+    /* Service Cards */
+    .service-card {
+        background: white;
+        border-radius: 20px;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(78, 115, 223, 0.1);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4e73df, #224abe);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 35px rgba(78, 115, 223, 0.15);
+        }
+
+    .service-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(78, 115, 223, 0.1), rgba(34, 66, 190, 0.05));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .service-card:hover .service-icon {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+    }
+
+    .service-icon i {
+        color: #4e73df;
+        transition: all 0.3s;
+        font-size: 2rem;
+    }
+
+    .service-card:hover .service-icon i {
+        color: white;
+    }
+
+    .service-card h3 {
+        color: #1a1a2e;
+    }
+
+    /* Statistics Cards */
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(78, 115, 223, 0.1);
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(78, 115, 223, 0.15);
+        }
+
+        .stat-card i {
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover i {
+            transform: scale(1.1);
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .library-hero h1 {
+            font-size: 2rem;
+        }
+
+        .service-card {
+            padding: 1.5rem;
+        }
+    }
+</style>

@@ -1,0 +1,228 @@
+﻿@model IEnumerable<LibraryD.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "My Borrows";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <!-- عنوان الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 bg-gradient-primary">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-white p-3 me-3 shadow-sm">
+                            <i class="bi bi-book-fill text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-white mb-1">My Borrow Requests</h2>
+                            <p class="text-white-50 mb-0">
+                                <i class="bi bi-book me-2"></i>
+                                View and manage your book borrowing requests
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسائل التنبيه -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+            <div>
+                <strong>Success!</strong> @TempData["Success"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+            <div>
+                <strong>Error!</strong> @TempData["Error"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- بطاقة الطلبات -->
+    <div class="card shadow border-0">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-primary">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Your Borrow Requests
+                </h5>
+                <a asp-action="Index" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Browse Books
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book</th>
+                            <th>Author</th>
+                            <th>Borrow Date</th>
+                            <th>Expected Return</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var borrow in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(borrow.Book?.Picture))
+                                        {
+                                            <img src="@borrow.Book.Picture" alt="Book cover"
+                                                 style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;"
+                                                 class="me-2" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-book text-primary me-2 fs-4"></i>
+                                        }
+                                        <strong>@(borrow.Book?.BookName ?? "N/A")</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="bi bi-person me-1 text-muted"></i>
+                                    @(borrow.Book?.Author ?? "N/A")
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        @(borrow.BorrowDate.HasValue? borrow.BorrowDate.Value.ToString("yyyy-MM-dd") : "N/A")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (borrow.ReturnDate.HasValue)
+                                    {
+                                        if (borrow.StatusId == 2 && borrow.ReturnDate.Value < DateTime.Now)
+                                        {
+                                            <span class="badge bg-danger text-white">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                @borrow.ReturnDate.Value.ToString("yyyy-MM-dd") (Overdue)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark">
+                                                <i class="bi bi-calendar-check me-1"></i>
+                                                @borrow.ReturnDate.Value.ToString("yyyy-MM-dd")
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not set</span>
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        string statusClass = borrow.StatusId == 3 ? "bg-warning text-dark" :
+                                        borrow.StatusId == 2 ? "bg-success" :
+                                        borrow.StatusId == 5 ? "bg-info" : "bg-secondary";
+                                        string statusText = borrow.StatusId == 3 ? "Pending" :
+                                        borrow.StatusId == 2 ? "Approved" :
+                                        borrow.StatusId == 5 ? "Returned" : "Unknown";
+                                        string statusIcon = borrow.StatusId == 3 ? "bi-clock-history" :
+                                        borrow.StatusId == 2 ? "bi-check-circle-fill" :
+                                        borrow.StatusId == 5 ? "bi-arrow-return-left" : "bi-question-circle";
+                                    }
+                                    <span class="badge @statusClass">
+                                        <i class="bi @statusIcon me-1"></i>
+                                        @statusText
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if (borrow.StatusId == 3) // Pending
+                                    {
+                                        <form method="post" asp-action="CancelBorrow" asp-route-borrowId="@borrow.BorrowId"
+                                              onsubmit="return confirm('Are you sure you want to cancel this borrow request?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-x-circle me-1"></i> Cancel Request
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (borrow.StatusId == 2) // Approved
+                                    {
+                                        <form method="post" asp-action="Return" asp-route-borrowId="@borrow.BorrowId"
+                                              onsubmit="return confirm('Are you sure you want to return this book?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-arrow-return-left me-1"></i> Return Book
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-book" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="text-muted mt-3">You have no borrow requests yet</h5>
+                    <p class="text-muted mb-4">Browse the library and borrow your favorite books</p>
+                    <a asp-action="Index" class="btn btn-primary px-4">
+                        <i class="bi bi-plus-circle me-2"></i> Browse Books
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+
+    .btn-outline-danger, .btn-outline-success {
+        transition: all 0.3s;
+    }
+
+        .btn-outline-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-outline-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+    }
+</style>

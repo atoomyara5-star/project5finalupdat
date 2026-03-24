@@ -1,0 +1,60 @@
+﻿@model LibraryD.Models.Room
+@{
+    ViewData["Title"] = "Edit Room";
+    Layout = "_AdminLayout";
+}
+
+<div class="card p-4 shadow-sm">
+    <h2 class="mb-4">
+        <i class="bi bi-pencil-square text-warning me-2"></i>
+        Edit Study Room
+    </h2>
+
+    <form method="post" asp-action="EditRoom">
+        <input type="hidden" asp-for="RoomId" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="RoomName" class="form-label fw-bold">
+                        <i class="bi bi-door-open me-1"></i> Room Name
+                    </label>
+                    <input asp-for="RoomName" class="form-control" required />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Capacity" class="form-label fw-bold">
+                        <i class="bi bi-people-fill me-1"></i> Capacity
+                    </label>
+                    <input asp-for="Capacity" type="number" class="form-control" required />
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StatusId" class="form-label fw-bold">
+                <i class="bi bi-info-circle me-1"></i> Status
+            </label>
+            <select asp-for="StatusId" class="form-select" asp-items="ViewBag.Statuses">
+                <option value="">-- Select Status --</option>
+            </select>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success px-4">
+                <i class="bi bi-save"></i> Save Changes
+            </button>
+            <a asp-action="RoomsList" class="btn btn-secondary px-4">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+</style>

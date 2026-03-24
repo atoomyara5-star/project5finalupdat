@@ -1,0 +1,205 @@
+﻿@model LibraryD.Models.Book
+@{
+    ViewData["Title"] = "Borrow Book";
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="bi bi-bookmark-plus me-2"></i>
+                        Borrow Book
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Book Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model?.Picture))
+                            {
+                                <img src="@Model.Picture"
+                                     alt="@Model.BookName"
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-height: 200px; width: 100%; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded text-center p-4">
+                                    <i class="bi bi-book fs-1 text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h3 class="fw-bold text-dark">@Model?.BookName</h3>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-person me-1"></i>
+                                <strong>Author:</strong> @Model?.Author
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-tags me-1"></i>
+                                <strong>Category:</strong> @(Model?.Category?.CategoryName ?? "N/A")
+                            </p>
+                            <p class="mb-0">
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Available
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Borrow Form -->
+                    <form method="post" asp-action="Borrow">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="bookId" value="@Model?.BookId" />
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-calendar-week me-1"></i>
+                                Borrow Duration
+                            </label>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <input type="range"
+                                           id="durationSlider"
+                                           name="durationDays"
+                                           class="form-range"
+                                           min="1"
+                                           max="30"
+                                           value="14"
+                                           step="1" />
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="number"
+                                               id="durationInput"
+                                               name="durationDays"
+                                               class="form-control text-center"
+                                               min="1"
+                                               max="30"
+                                               value="14" />
+                                        <span class="input-group-text">days</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Choose between 1 and 30 days
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Return Date Preview -->
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-check fs-3 me-3"></i>
+                                <div>
+                                    <strong>Expected Return Date:</strong><br />
+                                    <span id="returnDatePreview" class="fw-bold">
+                                        @{
+                                            var defaultDate = DateTime.Now.AddDays(14);
+                                            @defaultDate.ToString("yyyy-MM-dd")
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-check-circle me-1"></i> Confirm Borrow
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Borrowing Rules -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        Borrowing Rules
+                    </h6>
+                    <ul class="small text-muted mb-0">
+                        <li>Maximum borrowing period is 30 days</li>
+                        <li>Books must be returned by the expected return date</li>
+                        <li>Late returns may result in penalties</li>
+                        <li>You can cancel your request before admin approval</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const durationSlider = document.getElementById('durationSlider');
+    const durationInput = document.getElementById('durationInput');
+    const returnDatePreview = document.getElementById('returnDatePreview');
+
+    function updateReturnDate(days) {
+        const today = new Date();
+        const returnDate = new Date(today);
+        returnDate.setDate(today.getDate() + parseInt(days));
+
+        const year = returnDate.getFullYear();
+        const month = String(returnDate.getMonth() + 1).padStart(2, '0');
+        const day = String(returnDate.getDate()).padStart(2, '0');
+
+        returnDatePreview.textContent = `${year}-${month}-${day}`;
+    }
+
+    function updateDuration(value) {
+        durationSlider.value = value;
+        durationInput.value = value;
+        updateReturnDate(value);
+    }
+
+    durationSlider.addEventListener('input', function() {
+        updateDuration(this.value);
+    });
+
+    durationInput.addEventListener('change', function() {
+        let value = parseInt(this.value);
+        if (isNaN(value)) value = 14;
+        if (value < 1) value = 1;
+        if (value > 30) value = 30;
+        updateDuration(value);
+    });
+
+    updateDuration(14);
+</script>
+
+<style>
+    .form-range {
+        cursor: pointer;
+    }
+
+        .form-range::-webkit-slider-thumb {
+            background: #4e73df;
+        }
+
+        .form-range::-moz-range-thumb {
+            background: #4e73df;
+        }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+        border: none;
+        transition: all 0.3s;
+    }
+     
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 115, 223, 0.3);
+        }
+</style>

@@ -1,0 +1,88 @@
+﻿@model LibraryD.Models.Book
+@{
+    ViewData["Title"] = "Add Book";
+    Layout = "_AdminLayout";
+}
+
+<div class="card p-4">
+    <h2>Add New Book</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form method="post" asp-action="AddBook">
+        <div class="mb-3">
+            <label asp-for="BookName" class="form-label">Book Title</label>
+            <input asp-for="BookName" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Author" class="form-label">Author</label>
+            <input asp-for="Author" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryId" class="form-label">Category</label>
+            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                <option value="">Select Category</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Picture" class="form-label">Image URL</label>
+            <input asp-for="Picture" class="form-control" id="Picture"
+                   placeholder="https://example.com/book-cover.jpg" />
+            <div class="mt-2" id="previewContainer" style="display: none;">
+                <label>Preview:</label>
+                <img id="previewImage" src="" alt="Preview" style="max-height: 150px;" class="img-thumbnail" />
+            </div>
+            <small class="text-muted">Enter a valid image URL (JPG, PNG, WebP)</small>
+            <div id="imageStatus" class="small mt-1"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Book</button>
+        <a asp-action="BooksList" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    const pictureInput = document.getElementById('Picture');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const imageStatus = document.getElementById('imageStatus');
+
+    function loadImage(url) {
+        if (!url) {
+            previewContainer.style.display = 'none';
+            imageStatus.innerHTML = '';
+            return;
+        }
+
+        previewContainer.style.display = 'block';
+        imageStatus.innerHTML = '<span class="text-info">Loading image...</span>';
+
+        const img = new Image();
+        img.onload = function() {
+            previewImage.src = url;
+            imageStatus.innerHTML = '<span class="text-success">✓ Image loaded successfully</span>';
+        };
+        img.onerror = function() {
+            previewImage.src = 'https://via.placeholder.com/150?text=Invalid+URL';
+            imageStatus.innerHTML = '<span class="text-danger">✗ Invalid image URL or image not accessible</span>';
+        };
+        img.src = url;
+    }
+
+    pictureInput.addEventListener('input', function() {
+        loadImage(this.value.trim());
+    });
+
+    // Load on page load if value exists
+    if (pictureInput.value.trim()) {
+        loadImage(pictureInput.value.trim());
+    }
+</script>
